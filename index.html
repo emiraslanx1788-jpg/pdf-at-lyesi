@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PDF Atölyesi</title>
+<style>
+:root{
+  --bg:#e9edf0;--bar:#ffffff;--ink:#17212b;--muted:#5b6876;--line:#d2d9e0;--hover:#eef2f5;--accent:#0f766e;--accent-ink:#ffffff;
+  box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){--bg:#10161c;--bar:#18212a;--ink:#e8edf2;--muted:#9aa7b4;--line:#2a3541;--hover:#222d38;--accent:#2dd4bf;--accent-ink:#06201c}
+}
+:root[data-theme="dark"]{--bg:#10161c;--bar:#18212a;--ink:#e8edf2;--muted:#9aa7b4;--line:#2a3541;--hover:#222d38;--accent:#2dd4bf;--accent-ink:#06201c}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh}
+button,select,input{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bar);border-bottom:1px solid var(--line)}
+.row{display:flex;flex-wrap:wrap;gap:6px 12px;align-items:center;padding:8px 14px}
+.row+.row{border-top:1px solid var(--line)}
+.brand{font-weight:800;margin-right:8px}
+.brand i{font-style:normal;color:var(--accent)}
+.g{display:flex;gap:3px;align-items:center;padding-right:12px;border-right:1px solid var(--line)}
+.g:last-child{border:0;padding-right:0}
+.lab{font-size:.8rem;color:var(--muted);margin-right:4px}
+.b{min-width:34px;height:34px;padding:0 10px;border:0;border-radius:8px;background:transparent;cursor:pointer;font-weight:700}
+.b:hover{background:var(--hover)}
+.b.it{font-style:italic;font-weight:600}
+.b.un{text-decoration:underline}
+select,.num{height:34px;border:1px solid var(--line);border-radius:8px;padding:0 8px;background:var(--bar)}
+.num{width:52px}
+.sp{flex:1}
+.go{height:40px;padding:0 20px;border:0;border-radius:10px;background:var(--accent);color:var(--accent-ink);font-weight:800;cursor:pointer}
+.go:hover{filter:brightness(1.08)}
+
+.stage{padding:24px 12px 70px;display:flex;flex-direction:column;align-items:center;gap:12px}
+.tip{max-width:794px;width:100%;color:var(--muted);font-size:.9rem}
+.paper{
+  width:794px;max-width:100%;min-height:1123px;background:#fff;color:#111;padding:64px 68px;
+  box-shadow:0 8px 30px rgba(0,0,0,.22);border-radius:3px;outline:none;overflow-wrap:anywhere;
+  font-family:var(--ff,Georgia,serif);font-size:var(--fs,16px);line-height:1.65
+}
+.paper h1{font-size:2em;line-height:1.2;margin:.2em 0 .4em}
+.paper h2{font-size:1.4em;line-height:1.25;margin:1.1em 0 .4em}
+.paper p,.paper ul,.paper ol{margin:.6em 0}
+.paper ul,.paper ol{padding-left:1.5em}
+.paper img{max-width:100%;height:auto;display:block;margin:.8em auto}
+.paper blockquote{border-left:4px solid #0f766e;padding-left:14px;color:#444;margin:.8em 0}
+.paper table{border-collapse:collapse;width:100%;margin:.8em 0}
+.paper td,.paper th{border:1px solid #888;padding:6px 10px}
+.paper .c{text-align:center}
+
+@media(max-width:700px){.paper{padding:26px 20px;min-height:70vh}.g{border:0;padding-right:0}}
+
+@page{size:A4;margin:18mm}
+@media print{
+  :root{padding:0}
+  body{background:#fff}
+  .bar,.tip{display:none!important}
+  .stage{padding:0}
+  .paper{box-shadow:none;border-radius:0;width:auto;min-height:0;padding:0}
+  .paper h1,.paper h2{break-after:avoid}
+  .paper img,.paper blockquote,.paper tr{break-inside:avoid}
+}
+</style>
+</head>
+<body>
+
+<div class="bar" role="toolbar" aria-label="Araçlar">
+  <div class="row">
+    <div class="brand">PDF<i>Atölyesi</i></div>
+    <div class="g">
+      <button class="b" data-cmd="bold" title="Kalın"><b>B</b></button>
+      <button class="b it" data-cmd="italic" title="İtalik">I</button>
+      <button class="b un" data-cmd="underline" title="Altı çizili">U</button>
+    </div>
+    <div class="g">
+      <button class="b" data-block="h1" title="Büyük başlık">H1</button>
+      <button class="b" data-block="h2" title="Alt başlık">H2</button>
+      <button class="b" data-block="p" title="Normal yazı">Yazı</button>
+      <button class="b" data-block="blockquote" title="Alıntı">❝</button>
+    </div>
+    <div class="g">
+      <button class="b" data-cmd="insertUnorderedList" title="Madde listesi">• Liste</button>
+      <button class="b" data-cmd="insertOrderedList" title="Numaralı liste">1. Liste</button>
+    </div>
+    <div class="g">
+      <button class="b" data-cmd="justifyLeft" title="Sola yasla">⇤</button>
+      <button class="b" data-cmd="justifyCenter" title="Ortala">↔</button>
+      <button class="b" data-cmd="justifyRight" title="Sağa yasla">⇥</button>
+    </div>
+    <div class="sp"></div>
+    <button class="go" id="pdf">PDF indir</button>
+  </div>
+  <div class="row">
+    <div class="g">
+      <span class="lab">Şablon</span>
+      <button class="b" data-t="bos">Boş</button>
+      <button class="b" data-t="dilekce">Dilekçe</button>
+      <button class="b" data-t="kapak">Ödev kapağı</button>
+      <button class="b" data-t="cv">CV</button>
+    </div>
+    <div class="g">
+      <select id="font" aria-label="Yazı tipi">
+        <option value="Georgia,'Times New Roman',serif">Serif</option>
+        <option value="system-ui,'Segoe UI',Arial,sans-serif">Sans</option>
+        <option value="'Courier New',monospace">Daktilo</option>
+      </select>
+      <select id="size" aria-label="Boyut">
+        <option value="14px">14</option><option value="16px" selected>16</option>
+        <option value="18px">18</option><option value="20px">20</option>
+      </select>
+    </div>
+    <div class="g">
+      <button class="b" id="imgBtn">🖼 Resim</button>
+      <input type="file" id="imgFile" accept="image/*" hidden>
+    </div>
+    <div class="g">
+      <span class="lab">Tablo</span>
+      <input class="num" id="tr" type="number" min="1" max="20" value="3" aria-label="Satır">
+      <span class="lab">×</span>
+      <input class="num" id="tc" type="number" min="1" max="8" value="3" aria-label="Sütun">
+      <button class="b" id="tblBtn">Ekle</button>
+    </div>
+  </div>
+</div>
+
+<div class="stage">
+  <p class="tip">Beyaz sayfaya yaz, sonra <b>PDF indir</b>’e bas. Açılan pencerede <b>Hedef</b> kısmından <b>PDF olarak kaydet</b>’i seç. Düğme çalışmazsa <b>Ctrl + P</b> tuşlarına bas. Yanlış bir şey olursa <b>Ctrl + Z</b> ile geri al.</p>
+  <div class="paper" id="paper" contenteditable="true" spellcheck="true" aria-label="Belge"></div>
+</div>
+
+<script>
+const $=s=>document.querySelector(s), paper=$("#paper");
+
+const T={
+bos:`<p><br></p>`,
+dilekce:`<p class="c"><b>…… MAKAMINA</b></p><p><br></p>
+<p>Ben …………, T.C. kimlik numarası ………… olan öğrenciyim. ……………… konusunda gereğinin yapılmasını saygılarımla arz ederim.</p><p><br></p>
+<p style="text-align:right">Tarih: ../../....<br>Ad Soyad<br>İmza</p><p><br></p>
+<p><b>Adres:</b> …………<br><b>Telefon:</b> …………</p>`,
+kapak:`<p><br></p><p><br></p><p><br></p>
+<h1 class="c">ÖDEV BAŞLIĞI</h1>
+<p class="c" style="font-size:1.2em">Dersin Adı</p><p><br></p><p><br></p><p><br></p><p><br></p>
+<p class="c"><b>Hazırlayan:</b> Ad Soyad</p>
+<p class="c"><b>Sınıf / Numara:</b> ……</p>
+<p class="c"><b>Öğretmen:</b> ……</p>
+<p class="c"><b>Tarih:</b> ../../....</p>`,
+cv:`<h1>Ad Soyad</h1>
+<p>Telefon: …… · E-posta: …… · Şehir: ……</p>
+<h2>Hakkımda</h2><p>Kendini iki üç cümleyle tanıt.</p>
+<h2>Eğitim</h2><ul><li>Okul adı, bölüm (yıl – yıl)</li></ul>
+<h2>Deneyim</h2><ul><li>Yer, görev (yıl – yıl)</li></ul>
+<h2>Beceriler</h2><ul><li>……</li><li>……</li></ul>
+<h2>Diller</h2><ul><li>Türkçe (ana dil)</li><li>İngilizce (……)</li></ul>`
+};
+const START=`<h1>Başlığını buraya yaz</h1>
+<p>Bu sayfaya istediğini yazabilirsin. Üstteki düğmelerle yazıyı <b>kalın</b> ya da <i>italik</i> yapabilir, başlık, liste, resim ve tablo ekleyebilirsin.</p>
+<p>Hazır bir düzen istersen yukarıdan bir <b>şablon</b> seç.</p>`;
+
+let saved=null;
+try{saved=localStorage.getItem("pdf-atolyesi")}catch(e){}
+paper.innerHTML=saved||START;
+let tm;
+const kaydet=()=>{clearTimeout(tm);tm=setTimeout(()=>{try{localStorage.setItem("pdf-atolyesi",paper.innerHTML)}catch(e){}},400)};
+paper.addEventListener("input",kaydet);
+
+paper.addEventListener("paste",e=>{
+  e.preventDefault();
+  document.execCommand("insertText",false,e.clipboardData.getData("text/plain"));
+});
+
+/* Düğmeler odağı kaybettirmesin diye mousedown kullanılıyor */
+document.querySelectorAll("[data-cmd],[data-block],[data-t]").forEach(b=>{
+  b.addEventListener("mousedown",e=>{
+    e.preventDefault();paper.focus();
+    if(b.dataset.cmd)document.execCommand(b.dataset.cmd,false,null);
+    else if(b.dataset.block)document.execCommand("formatBlock",false,b.dataset.block);
+    else{document.execCommand("selectAll");document.execCommand("insertHTML",false,T[b.dataset.t])}
+    kaydet();
+  });
+});
+
+$("#font").onchange=e=>paper.style.setProperty("--ff",e.target.value);
+$("#size").onchange=e=>paper.style.setProperty("--fs",e.target.value);
+
+$("#imgBtn").onclick=()=>$("#imgFile").click();
+$("#imgFile").onchange=e=>{
+  const f=e.target.files[0];if(!f)return;
+  const r=new FileReader();
+  r.onload=()=>{paper.focus();document.execCommand("insertImage",false,r.result);kaydet()};
+  r.readAsDataURL(f);e.target.value="";
+};
+
+$("#tblBtn").addEventListener("mousedown",e=>{
+  e.preventDefault();
+  const s=Math.min(20,Math.max(1,+$("#tr").value||3)),c=Math.min(8,Math.max(1,+$("#tc").value||3));
+  paper.focus();
+  document.execCommand("insertHTML",false,"<table>"+("<tr>"+"<td>&nbsp;</td>".repeat(c)+"</tr>").repeat(s)+"</table><p><br></p>");
+  kaydet();
+});
+
+$("#pdf").onclick=()=>{
+  const h=paper.querySelector("h1,h2"),eski=document.title;
+  document.title=(h&&h.textContent.trim())||"belge";
+  try{window.print()}catch(e){}
+  setTimeout(()=>document.title=eski,600);
+};
+</script>
+</body>
+</html>
